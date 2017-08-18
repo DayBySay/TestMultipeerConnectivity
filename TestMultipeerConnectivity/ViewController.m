@@ -14,6 +14,8 @@
 @property (nonnull, strong) MCSession *session;
 @property (nonnull, strong) MCNearbyServiceBrowser *browser;
 @property (nonnull, strong) MCNearbyServiceAdvertiser *advetiser;
+@property (weak, nonatomic) IBOutlet UITextField *nameTextField;
+@property (weak, nonatomic) IBOutlet UITextView *textView;
 
 @end
 
@@ -43,6 +45,9 @@
     bvc.delegate = self;
     
     [self presentViewController:bvc animated:YES completion:nil];
+}
+- (IBAction)createSession:(id)sender {
+    [self initializeSessionWithPeerName:self.nameTextField.text];
 }
 
 # pragma mark - session delegate
@@ -75,12 +80,11 @@
 # pragma mark - browser delegate
 
 - (void)browser:(MCNearbyServiceBrowser *)browser foundPeer:(MCPeerID *)peerID withDiscoveryInfo:(NSDictionary<NSString *,NSString *> *)info {
-    NSLog(@"found peerID: %@", peerID);
+    [self addEventLog:[NSString stringWithFormat:@"found peerID: %@", peerID]];
 }
 
 - (void)browser:(MCNearbyServiceBrowser *)browser lostPeer:(MCPeerID *)peerID {
-    NSLog(@"lost peerID: %@", peerID);
-
+    [self addEventLog:[NSString stringWithFormat:@"lost peerID: %@", peerID]];
 }
 
 - (void)browser:(MCNearbyServiceBrowser *)browser didNotStartBrowsingForPeers:(NSError *)error {
@@ -109,6 +113,11 @@
 
 - (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didReceiveInvitationFromPeer:(MCPeerID *)peerID withContext:(NSData *)context invitationHandler:(void (^)(BOOL, MCSession * _Nullable))invitationHandler {
     
+}
+
+- (void)addEventLog:(NSString *)log {
+    NSLog(@"%@", log);
+    self.textView.text = [NSString stringWithFormat:@"%@\n%@", log, self.textView.text];
 }
 
 @end
