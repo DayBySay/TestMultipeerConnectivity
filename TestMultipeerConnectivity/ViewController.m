@@ -9,7 +9,7 @@
 #import "ViewController.h"
 @import MultipeerConnectivity;
 
-@interface ViewController () <MCSessionDelegate, MCNearbyServiceBrowserDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceAdvertiserDelegate>
+@interface ViewController () <MCSessionDelegate, MCNearbyServiceBrowserDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceAdvertiserDelegate, UITextFieldDelegate>
 @property (nonnull, strong) MCPeerID *peerID;
 @property (nonnull, strong) MCSession *session;
 @property (nonnull, strong) MCNearbyServiceBrowser *browser;
@@ -90,6 +90,13 @@ NSString *const servicetype = @"myservice";
                      error:&error];
     
     [self.nameTextField endEditing:YES];
+}
+
+# pragma mark - text field delegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField endEditing:YES];
+    return YES;
 }
 
 # pragma mark - session delegate
