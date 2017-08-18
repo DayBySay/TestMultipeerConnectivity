@@ -60,7 +60,7 @@ NSString *const servicetype = @"myservice";
 - (void)addEventLog:(NSString *)log {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSLog(@"%@", log);
-        self.textView.text = [NSString stringWithFormat:@"%@\n%@", log, self.textView.text];
+        self.textView.text = [NSString stringWithFormat:@"%@\n%@\n\n", log, self.textView.text];
     });
 }
 
@@ -81,6 +81,17 @@ NSString *const servicetype = @"myservice";
     [self addEventLog:@"Start advertising for peers"];
 }
 
+- (IBAction)sendMessage:(id)sender {
+    NSError *error = nil;
+    NSData *messageData = [self.nameTextField.text dataUsingEncoding:NSUTF8StringEncoding];
+    [self.session sendData:messageData
+                   toPeers:self.session.connectedPeers
+                  withMode:MCSessionSendDataReliable
+                     error:&error];
+    
+    [self.nameTextField endEditing:YES];
+}
+
 # pragma mark - session delegate
 
 - (void)session:(MCSession *)session peer:(MCPeerID *)peerID didChangeState:(MCSessionState)state {
@@ -88,7 +99,8 @@ NSString *const servicetype = @"myservice";
 }
 
 - (void)session:(MCSession *)session didReceiveData:(NSData *)data fromPeer:(MCPeerID *)peerID {
-    
+    NSString *message = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    [self addEventLog:[NSString stringWithFormat:@"Did receive message %@ from peerID: %@", message, peerID]];
 }
 
 - (void)session:(MCSession *)session didReceiveStream:(NSInputStream *)stream withName:(NSString *)streamName fromPeer:(MCPeerID *)peerID {
