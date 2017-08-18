@@ -56,6 +56,7 @@ NSString *const servicetype = @"myservice";
 }
 - (IBAction)createSession:(id)sender {
     [self initializeSessionWithPeerName:self.nameTextField.text];
+    [self addEventLog:@"Created session"];
 }
 
 - (IBAction)discovery:(id)sender {
@@ -71,7 +72,7 @@ NSString *const servicetype = @"myservice";
 # pragma mark - session delegate
 
 - (void)session:(MCSession *)session peer:(MCPeerID *)peerID didChangeState:(MCSessionState)state {
-    
+    [self addEventLog:[NSString stringWithFormat:@"Did change state to: %ld with peerID: %@", state, peerID]];
 }
 
 - (void)session:(MCSession *)session didReceiveData:(NSData *)data fromPeer:(MCPeerID *)peerID {
@@ -79,10 +80,6 @@ NSString *const servicetype = @"myservice";
 }
 
 - (void)session:(MCSession *)session didReceiveStream:(NSInputStream *)stream withName:(NSString *)streamName fromPeer:(MCPeerID *)peerID {
-    
-}
-
-- (void)session:(MCSession *)session didReceiveCertificate:(NSArray *)certificate fromPeer:(MCPeerID *)peerID certificateHandler:(void (^)(BOOL))certificateHandler {
     
 }
 
@@ -99,6 +96,10 @@ NSString *const servicetype = @"myservice";
 
 - (void)browser:(MCNearbyServiceBrowser *)browser foundPeer:(MCPeerID *)peerID withDiscoveryInfo:(NSDictionary<NSString *,NSString *> *)info {
     [self addEventLog:[NSString stringWithFormat:@"found peerID: %@", peerID]];
+    
+    [browser invitePeer:peerID toSession:self.session withContext:nil timeout:0];
+    [self addEventLog:[NSString stringWithFormat:@"Send invitation for peerID: %@", peerID]];
+
 }
 
 - (void)browser:(MCNearbyServiceBrowser *)browser lostPeer:(MCPeerID *)peerID {
@@ -130,12 +131,16 @@ NSString *const servicetype = @"myservice";
 }
 
 - (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didReceiveInvitationFromPeer:(MCPeerID *)peerID withContext:(NSData *)context invitationHandler:(void (^)(BOOL, MCSession * _Nullable))invitationHandler {
+    [self addEventLog:[NSString stringWithFormat:@"Receive invitation from peerID: %@", peerID]];
     
+    invitationHandler(YES, self.session);
 }
 
 - (void)addEventLog:(NSString *)log {
-    NSLog(@"%@", log);
-    self.textView.text = [NSString stringWithFormat:@"%@\n%@", log, self.textView.text];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"%@", log);
+        self.textView.text = [NSString stringWithFormat:@"%@\n%@", log, self.textView.text];
+    });
 }
 
 @end
