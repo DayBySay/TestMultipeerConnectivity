@@ -21,13 +21,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    
-    self.peerID = [[MCPeerID alloc] initWithDisplayName:@"unpotan"];
+}
+
+- (void)initializeSessionWithPeerName:(NSString *)name {
+    self.peerID = [[MCPeerID alloc] initWithDisplayName:name];
     self.session = [[MCSession alloc] initWithPeer:self.peerID];
     self.session.delegate = self;
     
-    NSString *servicetype = @"unkoservice";
+    NSString *servicetype = @"myservice";
     self.browser = [[MCNearbyServiceBrowser alloc] initWithPeer:self.peerID serviceType:servicetype];
     self.browser.delegate = self;
     [self.browser startBrowsingForPeers];
@@ -37,9 +38,7 @@
     [self.advetiser startAdvertisingPeer];
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
+- (void)startAdvertising {
     MCBrowserViewController *bvc = [[MCBrowserViewController alloc] initWithBrowser:self.browser session:self.session];
     bvc.delegate = self;
     
@@ -76,11 +75,12 @@
 # pragma mark - browser delegate
 
 - (void)browser:(MCNearbyServiceBrowser *)browser foundPeer:(MCPeerID *)peerID withDiscoveryInfo:(NSDictionary<NSString *,NSString *> *)info {
-    NSLog(@"peerID: %@", peerID);
+    NSLog(@"found peerID: %@", peerID);
 }
 
 - (void)browser:(MCNearbyServiceBrowser *)browser lostPeer:(MCPeerID *)peerID {
-    
+    NSLog(@"lost peerID: %@", peerID);
+
 }
 
 - (void)browser:(MCNearbyServiceBrowser *)browser didNotStartBrowsingForPeers:(NSError *)error {
