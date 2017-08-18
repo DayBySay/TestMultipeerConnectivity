@@ -19,26 +19,34 @@
 
 @end
 
+NSString *const servicetype = @"myservice";
+
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
 }
 
-- (void)initializeSessionWithPeerName:(NSString *)name {
-    self.peerID = [[MCPeerID alloc] initWithDisplayName:name];
-    self.session = [[MCSession alloc] initWithPeer:self.peerID];
-    self.session.delegate = self;
-    
-    NSString *servicetype = @"myservice";
+- (void)discoveryPeers {
     self.browser = [[MCNearbyServiceBrowser alloc] initWithPeer:self.peerID serviceType:servicetype];
     self.browser.delegate = self;
     [self.browser startBrowsingForPeers];
-    
+
+}
+
+- (void)advertisingForPeers {
     self.advetiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer:self.peerID discoveryInfo:nil serviceType:servicetype];
     self.advetiser.delegate = self;
     [self.advetiser startAdvertisingPeer];
 }
+
+- (void)initializeSessionWithPeerName:(NSString *)name {
+    self.peerID = [[MCPeerID alloc] initWithDisplayName:name];
+    self.session = [[MCSession alloc] initWithPeer:self.peerID];
+    self.session.delegate = self;
+    [self.nameTextField endEditing:YES];
+}
+
 
 - (void)startAdvertising {
     MCBrowserViewController *bvc = [[MCBrowserViewController alloc] initWithBrowser:self.browser session:self.session];
@@ -48,6 +56,16 @@
 }
 - (IBAction)createSession:(id)sender {
     [self initializeSessionWithPeerName:self.nameTextField.text];
+}
+
+- (IBAction)discovery:(id)sender {
+    [self discoveryPeers];
+    [self addEventLog:@"Start discovery for peers"];
+}
+
+- (IBAction)advertising:(id)sender {
+    [self advertisingForPeers];
+    [self addEventLog:@"Start advertising for peers"];
 }
 
 # pragma mark - session delegate
