@@ -27,6 +27,9 @@ NSString *const servicetype = @"myservice";
     [super viewDidLoad];
 }
 
+
+# pragma mark -
+
 - (void)discoveryPeers {
     self.browser = [[MCNearbyServiceBrowser alloc] initWithPeer:self.peerID serviceType:servicetype];
     self.browser.delegate = self;
@@ -47,13 +50,22 @@ NSString *const servicetype = @"myservice";
     [self.nameTextField endEditing:YES];
 }
 
-
 - (void)startAdvertising {
     MCBrowserViewController *bvc = [[MCBrowserViewController alloc] initWithBrowser:self.browser session:self.session];
     bvc.delegate = self;
     
     [self presentViewController:bvc animated:YES completion:nil];
 }
+
+- (void)addEventLog:(NSString *)log {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"%@", log);
+        self.textView.text = [NSString stringWithFormat:@"%@\n%@", log, self.textView.text];
+    });
+}
+
+# pragma mark - actions
+
 - (IBAction)createSession:(id)sender {
     [self initializeSessionWithPeerName:self.nameTextField.text];
     [self addEventLog:@"Created session"];
@@ -86,7 +98,6 @@ NSString *const servicetype = @"myservice";
 - (void)session:(MCSession *)session didStartReceivingResourceWithName:(NSString *)resourceName fromPeer:(MCPeerID *)peerID withProgress:(NSProgress *)progress {
     
 }
-
 
 - (void)session:(MCSession *)session didFinishReceivingResourceWithName:(NSString *)resourceName fromPeer:(MCPeerID *)peerID atURL:(NSURL *)localURL withError:(NSError *)error {
     
@@ -127,20 +138,13 @@ NSString *const servicetype = @"myservice";
 # pragma mark - advertiser delegate
 
 - (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didNotStartAdvertisingPeer:(NSError *)error {
-    
+    [self addEventLog:[NSString stringWithFormat:@"Did not started advertising with error: %@", error]];
 }
 
 - (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didReceiveInvitationFromPeer:(MCPeerID *)peerID withContext:(NSData *)context invitationHandler:(void (^)(BOOL, MCSession * _Nullable))invitationHandler {
     [self addEventLog:[NSString stringWithFormat:@"Receive invitation from peerID: %@", peerID]];
     
     invitationHandler(YES, self.session);
-}
-
-- (void)addEventLog:(NSString *)log {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"%@", log);
-        self.textView.text = [NSString stringWithFormat:@"%@\n%@", log, self.textView.text];
-    });
 }
 
 @end
